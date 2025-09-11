@@ -5,7 +5,7 @@
 from datetime import timedelta, datetime
 from shared_client import client as bot_client
 from telethon import events
-from utils.func import get_premium_details, is_private_chat, get_display_name, get_user_data, premium_users_collection, is_premium_user
+from utils.func import get_premium_details, is_private_chat, get_display_name, get_user_data, premium_users_collection, get_premium_users, is_premium_user
 from config import OWNER_ID
 import logging
 logging.basicConfig(format=
@@ -175,4 +175,21 @@ async def remove_premium_handler(event):
     except Exception as e:
         logger.error(f'Error removing premium from {target_user_id}: {e}')
         await event.respond(f'❌ Error removing premium: {str(e)}')
+
         return
+
+@bot_client.on(events.NewMessage(pattern='/get'))
+async def get_all_premium(event):
+    if event.sender_id != OWNER_ID:  # replace OWNER_ID with your actual owner/admin ID
+        return await event.reply("❌ You are not authorized to use this command.")
+
+    users = get_premium_users()
+    if not users:
+        await event.reply("⚠️ No premium users found.")
+        return
+
+    msg = "👑 Premium Users List 👑\n\n"
+    for uid, limit in users:
+        msg += f"➤ User ID: `{uid}` | Limit: `{limit}`\n"
+
+    await event.reply(msg)
